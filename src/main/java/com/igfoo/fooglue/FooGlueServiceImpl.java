@@ -69,13 +69,6 @@ public class FooGlueServiceImpl
   private Map<String, List> linksCache = new ConcurrentHashMap<String, List>();
   private Map<String, String> titleCache = new ConcurrentHashMap<String, String>();
 
-  // labels for accessing specific asset types
-  public static final String GLOBAL = "global";
-  public static final String SCRIPTS = "scripts";
-  public static final String METAS = "metatags";
-  public static final String LINKS = "links";
-  public static final String TITLE = "title";
-
   /**
    * A continuous looping thread that polls the file system for changes to both
    * configuration files and asset files, css and javascript. Starts execution
@@ -464,7 +457,7 @@ public class FooGlueServiceImpl
 
       // add meta list to asset map if anything to add
       if (metas.size() > 0) {
-        curAssets.put(METAS, metas);
+        curAssets.put(FooGlueConstants.METAS, metas);
       }
     }
 
@@ -508,7 +501,7 @@ public class FooGlueServiceImpl
 
       // add script list to asset map if anything to add
       if (scripts.size() > 0) {
-        curAssets.put(SCRIPTS, scripts);
+        curAssets.put(FooGlueConstants.SCRIPTS, scripts);
       }
     }
 
@@ -553,7 +546,7 @@ public class FooGlueServiceImpl
 
       // add links list to asset map if anything to add
       if (links.size() > 0) {
-        curAssets.put(LINKS, links);
+        curAssets.put(FooGlueConstants.LINKS, links);
       }
     }
 
@@ -565,7 +558,7 @@ public class FooGlueServiceImpl
 
         // if global and caching we have to clear all caches because we don't
         // know what the global values touch
-        assets.put(GLOBAL, curAssets);
+        assets.put(FooGlueConstants.GLOBAL, curAssets);
         if (cacheAssets) {
           scriptsCache.clear();
           metaCache.clear();
@@ -821,7 +814,7 @@ public class FooGlueServiceImpl
     List<String> scriptTags = new ArrayList<String>();
 
     // get the global and id assets
-    Map globalAssets = (Map)assets.get(GLOBAL);
+    Map globalAssets = (Map)assets.get(FooGlueConstants.GLOBAL);
     Map idAssets = (Map)assets.get(id);
     if (requireIdForAssets && idAssets == null) {
       return scriptTags;
@@ -829,7 +822,8 @@ public class FooGlueServiceImpl
 
     // add the global scripts
     if (includeGlobal && globalAssets != null) {
-      List<Map> globalScripts = (List<Map>)globalAssets.get(SCRIPTS);
+      List<Map> globalScripts = (List<Map>)globalAssets
+        .get(FooGlueConstants.SCRIPTS);
       if (globalScripts != null && globalScripts.size() > 0) {
         for (Map<String, String> scriptAttrs : globalScripts) {
           String scriptTag = createScriptTag(scriptAttrs, locale);
@@ -840,7 +834,7 @@ public class FooGlueServiceImpl
 
     // add the scripts for the path
     if (idAssets != null) {
-      List<Map> idScripts = (List<Map>)idAssets.get(SCRIPTS);
+      List<Map> idScripts = (List<Map>)idAssets.get(FooGlueConstants.SCRIPTS);
       if (idScripts != null && idScripts.size() > 0) {
         for (Map<String, String> scriptAttrs : idScripts) {
           String scriptTag = createScriptTag(scriptAttrs, locale);
@@ -885,7 +879,7 @@ public class FooGlueServiceImpl
     List<String> metaTags = new ArrayList<String>();
 
     // get the global and path assets
-    Map globalAssets = (Map)assets.get(GLOBAL);
+    Map globalAssets = (Map)assets.get(FooGlueConstants.GLOBAL);
     Map idAssets = (Map)assets.get(id);
     if (requireIdForAssets && idAssets == null) {
       return metaTags;
@@ -893,7 +887,8 @@ public class FooGlueServiceImpl
 
     // add the global meta tags
     if (includeGlobal && globalAssets != null) {
-      List<Map> globalMetas = (List<Map>)globalAssets.get(METAS);
+      List<Map> globalMetas = (List<Map>)globalAssets
+        .get(FooGlueConstants.METAS);
       if (globalMetas != null && globalMetas.size() > 0) {
         for (Map<String, String> metaAttrs : globalMetas) {
           String metaTag = createMetaTag(metaAttrs, locale);
@@ -904,7 +899,7 @@ public class FooGlueServiceImpl
 
     // add the met tags for the path
     if (idAssets != null) {
-      List<Map> idMetas = (List<Map>)idAssets.get(METAS);
+      List<Map> idMetas = (List<Map>)idAssets.get(FooGlueConstants.METAS);
       if (idMetas != null && idMetas.size() > 0) {
         for (Map<String, String> metaAttrs : idMetas) {
           String metaTag = createMetaTag(metaAttrs, locale);
@@ -949,7 +944,7 @@ public class FooGlueServiceImpl
     List<String> linkTags = new ArrayList<String>();
 
     // get the global and path assets
-    Map globalAssets = (Map)assets.get(GLOBAL);
+    Map globalAssets = (Map)assets.get(FooGlueConstants.GLOBAL);
     Map idAssets = (Map)assets.get(id);
     if (requireIdForAssets && idAssets == null) {
       return linkTags;
@@ -957,7 +952,8 @@ public class FooGlueServiceImpl
 
     // add the global links
     if (includeGlobal && globalAssets != null) {
-      List<Map> globalLinks = (List<Map>)globalAssets.get(LINKS);
+      List<Map> globalLinks = (List<Map>)globalAssets
+        .get(FooGlueConstants.LINKS);
       if (globalLinks != null && globalLinks.size() > 0) {
         for (Map<String, String> linkAttrs : globalLinks) {
           String linkTag = createLinkTag(linkAttrs, locale);
@@ -968,7 +964,7 @@ public class FooGlueServiceImpl
 
     // add the links for the path
     if (idAssets != null) {
-      List<Map> idLinks = (List<Map>)idAssets.get(LINKS);
+      List<Map> idLinks = (List<Map>)idAssets.get(FooGlueConstants.LINKS);
       if (idLinks != null && idLinks.size() > 0) {
         for (Map<String, String> linkAttrs : idLinks) {
           String linkTag = createLinkTag(linkAttrs, locale);
@@ -1009,7 +1005,7 @@ public class FooGlueServiceImpl
     }
 
     // get the global and path assets
-    Map globalAssets = (Map)assets.get(GLOBAL);
+    Map globalAssets = (Map)assets.get(FooGlueConstants.GLOBAL);
     Map idAssets = (Map)assets.get(id);
     if (requireIdForAssets && idAssets == null) {
       return null;
@@ -1017,9 +1013,9 @@ public class FooGlueServiceImpl
 
     String title = null;
     if (idAssets != null) {
-      title = (String)idAssets.get(TITLE);
+      title = (String)idAssets.get(FooGlueConstants.TITLE);
       if (includeGlobal && globalAssets != null && StringUtils.isBlank(title)) {
-        title = (String)globalAssets.get(TITLE);
+        title = (String)globalAssets.get(FooGlueConstants.TITLE);
       }
     }
 
