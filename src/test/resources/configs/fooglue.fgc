@@ -1,0 +1,29 @@
+{
+    "aliases" : {    
+      "alias1" : "/js/one.js",
+      "alias2" : "/js/two.js",
+      "alias3" : "/css/one.css",
+      "alias4" : "/css/two.css"            
+    },  
+    
+    "title" : "[[default.title]]",
+    
+    "meta" : [
+        {
+            "http-equiv": "Content-Type",
+            "content": "text/html; charset=utf-8" 
+        }    
+    ],
+    
+    "scripts" : [
+        "{{alias1}}",
+        "{{alias2}}",
+        "/js/three.js"       
+    ],  
+    
+    "links" : [
+        "{{alias3}}",
+        "{{alias4}}",   
+      "/css/three.css"
+    ] 
+}

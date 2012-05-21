@@ -46,7 +46,7 @@ public class FooGlueServiceImpl
   private String propertyTagStart = "[[";
   private String propertyTagEnd = "]]";
   private String assetHost;
-  private boolean requireIdForAssets = true;
+  private boolean requireIdForAssets = false;
 
   // config file and asset file reloading
   private long reloadInterval = 2000;
@@ -314,7 +314,7 @@ public class FooGlueServiceImpl
   }
 
   /**
-   * Minifies and caches asset source files. Allows scripts and stylesheets to
+   * Minify and cache asset source files. Allows scripts and stylesheets to
    * be changed on the fly and new versions to have new names and be loaded
    * immediately by users.
    * 
@@ -327,7 +327,7 @@ public class FooGlueServiceImpl
 
     // if the cache directory does exist, try to create it, if we can't then
     // just return, nothing to do
-    File cacheRoot = new File(rootDir, cacheDir);
+    File cacheRoot = new File(cacheDir);
     if (!cacheRoot.exists()) {
       if (!cacheRoot.mkdirs()) {
         return;
@@ -442,7 +442,7 @@ public class FooGlueServiceImpl
     // add the title
     String title = JSONUtils.getStringValue(asset, "title");
     if (StringUtils.isNotBlank(title)) {
-      curAssets.put("title", resolveAlias(title));
+      curAssets.put(FooGlueConstants.TITLE, resolveAlias(title));
     }
 
     // loop through the meta tag configurations
@@ -766,6 +766,30 @@ public class FooGlueServiceImpl
    */
   public void initialize() {
 
+    // setup the cache directory
+    if (StringUtils.isBlank(cacheDir)) {
+      
+      // setup the cache under a temp directory if a directory isn't specified
+      File tempCache = new File(FileUtils.getTempDirectory(), "_fg_cache_");
+      boolean goodCacheDir = tempCache.exists();
+      
+      // if the cache directory doesn't exist and you can't create it, then 
+      // turn caching off
+      if (!goodCacheDir) {
+        goodCacheDir = tempCache.mkdirs();
+        if (!goodCacheDir) {
+          LOG.error("Couldn't create cache directory, turing caching off");
+          cacheAssets = false;
+          minifyAssets = false;
+        }
+      }
+      
+      // set the cache directory if good
+      if (goodCacheDir) {
+        cacheDir = tempCache.getPath();
+      }
+    }
+
     // load all asset config files
     if (configResources != null && configResources.length > 0) {
       loadAllAssetConfigFiles();
@@ -1004,19 +1028,20 @@ public class FooGlueServiceImpl
       return titleCache.get(cacheKey);
     }
 
-    // get the global and path assets
+    // get the global and id assets
     Map globalAssets = (Map)assets.get(FooGlueConstants.GLOBAL);
     Map idAssets = (Map)assets.get(id);
     if (requireIdForAssets && idAssets == null) {
       return null;
     }
 
+    // check global title if id title isn't present
     String title = null;
     if (idAssets != null) {
       title = (String)idAssets.get(FooGlueConstants.TITLE);
-      if (includeGlobal && globalAssets != null && StringUtils.isBlank(title)) {
-        title = (String)globalAssets.get(FooGlueConstants.TITLE);
-      }
+    }
+    if (includeGlobal && globalAssets != null && StringUtils.isBlank(title)) {
+      title = (String)globalAssets.get(FooGlueConstants.TITLE);
     }
 
     // convert to message if necessary
@@ -1219,6 +1244,62 @@ public class FooGlueServiceImpl
     this.minifyAssets = minifyAssets;
   }
 
+  public String getRootDir() {
+    return rootDir;
+  }
+
+  public void setRootDir(String rootDir) {
+    this.rootDir = rootDir;
+  }
+
+  public String getAliasTagStart() {
+    return aliasTagStart;
+  }
+
+  public void setAliasTagStart(String aliasTagStart) {
+    this.aliasTagStart = aliasTagStart;
+  }
+
+  public String getAliasTagEnd() {
+    return aliasTagEnd;
+  }
+
+  public void setAliasTagEnd(String aliasTagEnd) {
+    this.aliasTagEnd = aliasTagEnd;
+  }
+
+  public String getPropertyTagStart() {
+    return propertyTagStart;
+  }
+
+  public void setPropertyTagStart(String propertyTagStart) {
+    this.propertyTagStart = propertyTagStart;
+  }
+
+  public String getPropertyTagEnd() {
+    return propertyTagEnd;
+  }
+
+  public void setPropertyTagEnd(String propertyTagEnd) {
+    this.propertyTagEnd = propertyTagEnd;
+  }
+
+  public long getReloadInterval() {
+    return reloadInterval;
+  }
+
+  public void setReloadInterval(long reloadInterval) {
+    this.reloadInterval = reloadInterval;
+  }
+
+  public String getCacheDir() {
+    return cacheDir;
+  }
+
+  public void setCacheDir(String cacheDir) {
+    this.cacheDir = cacheDir;
+  }
+
   public String getAssetHost() {
     return assetHost;
   }
@@ -1233,6 +1314,14 @@ public class FooGlueServiceImpl
 
   public void setMessageSource(MessageSource messageSource) {
     this.messageSource = messageSource;
+  }
+
+  public boolean isRequireIdForAssets() {
+    return requireIdForAssets;
+  }
+
+  public void setRequireIdForAssets(boolean requireIdForAssets) {
+    this.requireIdForAssets = requireIdForAssets;
   }
 
 }

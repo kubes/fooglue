@@ -1,0 +1,20 @@
+{
+    "id": ["testing1"],
+
+    "title" : "[[testing1.title]]",
+       
+    "meta" : [
+        {
+            "name": "keywords",
+            "content": "one two" 
+        }
+    ],
+
+    "scripts" : [      
+      "/js/testing1.js"
+    ] ,
+        
+    "links" : [
+      "/css/testing1.css"
+    ] 
+}
