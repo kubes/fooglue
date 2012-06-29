@@ -19,7 +19,7 @@
   
   <bean id="fooglue" class="com.igfoo.fooglue.FooGlueServiceImpl"
     init-method="initialize" destroy-method="shutdown">
-    <property name="configResources" value="/configs/**/*.fgc" />
+    <property name="configResources" value="/fooglue/configs/**/*.fgc" />
     <property name="cacheAssets" value="false" />
     <property name="minifyAssets" value="false" />
     <property name="assetHost" value="http://localhost" />

@@ -314,8 +314,8 @@ public class FooGlueServiceImpl
   }
 
   /**
-   * Minify and cache asset source files. Allows scripts and stylesheets to
-   * be changed on the fly and new versions to have new names and be loaded
+   * Minify and cache asset source files. Allows scripts and stylesheets to be
+   * changed on the fly and new versions to have new names and be loaded
    * immediately by users.
    * 
    * @param fieldMap The asset key values Map.
@@ -764,16 +764,16 @@ public class FooGlueServiceImpl
    * Initialize the fooglue service. Loads all of the configuration resources.
    * Starts up the changes monitoring.
    */
-  public void initialize() {
+  public synchronized void initialize() {
 
     // setup the cache directory
     if (StringUtils.isBlank(cacheDir)) {
-      
+
       // setup the cache under a temp directory if a directory isn't specified
       File tempCache = new File(FileUtils.getTempDirectory(), "_fg_cache_");
       boolean goodCacheDir = tempCache.exists();
-      
-      // if the cache directory doesn't exist and you can't create it, then 
+
+      // if the cache directory doesn't exist and you can't create it, then
       // turn caching off
       if (!goodCacheDir) {
         goodCacheDir = tempCache.mkdirs();
@@ -783,7 +783,7 @@ public class FooGlueServiceImpl
           minifyAssets = false;
         }
       }
-      
+
       // set the cache directory if good
       if (goodCacheDir) {
         cacheDir = tempCache.getPath();
@@ -807,10 +807,39 @@ public class FooGlueServiceImpl
   }
 
   /**
-   * Shutdown the fooglue service. Configuration change monitoring is stopped.
+   * Shutdown the fooglue service. Clears all assets and configs. Clears all
+   * caches. Delete the cache directory from the file system.
    */
-  public void shutdown() {
+  public synchronized void shutdown() {
+
+    // set active to false to stop the reloader
     active.set(false);
+
+    // clear the assets and configs
+    fileModTimes.clear();
+    configSet.clear();
+    assetSet.clear();
+    assetsToConfigs.clear();
+    idToConfig.clear();
+    assets.clear();
+
+    // clear the caches
+    aliasesCache.clear();
+    scriptsCache.clear();
+    metaCache.clear();
+    linksCache.clear();
+    titleCache.clear();
+
+    // quietly remove the cache directory
+    FileUtils.deleteQuietly(new File(cacheDir));
+  }
+
+  /**
+   * Reinitializes the service by shutting down and then restarting.
+   */
+  public synchronized void reinitialize() {
+    shutdown();
+    initialize();
   }
 
   /**

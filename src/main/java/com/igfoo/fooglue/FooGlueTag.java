@@ -23,19 +23,19 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * meta tags, and titles.</p>
  * 
  * <p>Options can be set to include global assets and to include dynamic assets.
- * Global assets are configured in the global fooglue config file.  Dynamic 
+ * Global assets are configured in the global fooglue config file. Dynamic
  * assets are setup in the request by the Spring controller.</p>
  * 
- * <p>There are four different asset type that can be written.  The are script,
- * meta, link, and title.  Script writes out script tags, usually javascript.
- * Meta writes out meta tags.  Link writes out link tags, usually stylesheets.
+ * <p>There are four different asset type that can be written. The are script,
+ * meta, link, and title. Script writes out script tags, usually javascript.
+ * Meta writes out meta tags. Link writes out link tags, usually stylesheets.
  * And title writes out the page title.</p>
  * 
  * <p>If ids are specified on the tag they override any ids setup in the Spring
- * controller.  Usually one or more ids are specified by the controller and put
- * into the request.  Ids are only specified on the tag in special cases, such
- * as when you have specific scripts that run in a specific location on a page.
- * An example of this would be analytics or advertisements.</p>
+ * controller. Usually one or more ids are specified by the controller and put
+ * into the request. Ids are only specified on the tag in special cases, such as
+ * when you have specific scripts that run in a specific location on a page. An
+ * example of this would be analytics or advertisements.</p>
  */
 public class FooGlueTag
   extends TagSupport {
@@ -70,7 +70,7 @@ public class FooGlueTag
       HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
       WebApplicationContext context = RequestContextUtils
         .getWebApplicationContext(request);
-      FooGlueService fooglue = (FooGlueService)context.getBean("fooglue");
+      FooGlueService fg = (FooGlueService)context.getBean("fooGlueService");
 
       // get the current locale and the output writer
       Locale curLocale = request.getLocale();
@@ -95,7 +95,7 @@ public class FooGlueTag
         boolean tagSpecifiedIds = (this.ids != null);
         String idStr = (tagSpecifiedIds) ? this.ids : (String)request
           .getAttribute(FooGlueConstants.IDS);
-        
+
         // dedup tag ids, keep in order
         Set<String> tagIdSet = new LinkedHashSet<String>();
         for (String tagId : StringUtils.split(idStr, ",")) {
@@ -110,7 +110,7 @@ public class FooGlueTag
 
           // use only the first title found for an id, can't have multiple
           for (String tagId : tagIdSet) {
-            title = fooglue.getTitleTagForId(tagId, curLocale, includeGlobal);
+            title = fg.getTitleTagForId(tagId, curLocale, includeGlobal);
             if (StringUtils.isNotBlank(title)) {
               break;
             }
@@ -122,7 +122,7 @@ public class FooGlueTag
             String dynTitle = (String)request
               .getAttribute(FooGlueConstants.TITLE);
             if (StringUtils.isNotBlank(dynTitle)) {
-              String locTitle = fooglue.getDynamicTitleTag(dynTitle, curLocale);
+              String locTitle = fg.getDynamicTitleTag(dynTitle, curLocale);
               if (StringUtils.isNotBlank(locTitle)) {
                 title = locTitle;
               }
@@ -142,7 +142,7 @@ public class FooGlueTag
           // get all meta tags for the ids first
           List<String> allMetaTags = new ArrayList<String>();
           for (String tagId : tagIdSet) {
-            List<String> metaTags = fooglue.getMetaTagsForId(tagId, curLocale,
+            List<String> metaTags = fg.getMetaTagsForId(tagId, curLocale,
               includeGlobal);
             if (metaTags != null && metaTags.size() > 0) {
               allMetaTags.addAll(metaTags);
@@ -154,7 +154,7 @@ public class FooGlueTag
             List<Map<String, String>> requestMetaTags = (List<Map<String, String>>)request
               .getAttribute(FooGlueConstants.METAS);
             if (requestMetaTags != null && requestMetaTags.size() > 0) {
-              List<String> dynamicMetaTags = fooglue.getDynamicMetaTags(
+              List<String> dynamicMetaTags = fg.getDynamicMetaTags(
                 requestMetaTags, curLocale);
               if (allMetaTags != null && dynamicMetaTags.size() > 0) {
                 allMetaTags.addAll(dynamicMetaTags);
@@ -177,7 +177,7 @@ public class FooGlueTag
           // get all link tags for the ids first
           List<String> allLinkTags = new ArrayList<String>();
           for (String tagId : tagIdSet) {
-            List<String> linkTags = fooglue.getLinkTagsForId(tagId, curLocale,
+            List<String> linkTags = fg.getLinkTagsForId(tagId, curLocale,
               includeGlobal);
             if (linkTags != null && linkTags.size() > 0) {
               allLinkTags.addAll(linkTags);
@@ -189,7 +189,7 @@ public class FooGlueTag
             List<Map<String, String>> requestLinkTags = (List<Map<String, String>>)request
               .getAttribute(FooGlueConstants.LINKS);
             if (requestLinkTags != null && requestLinkTags.size() > 0) {
-              List<String> dynamicLinkTags = fooglue.getDynamicLinkTags(
+              List<String> dynamicLinkTags = fg.getDynamicLinkTags(
                 requestLinkTags, curLocale);
               if (dynamicLinkTags != null && dynamicLinkTags.size() > 0) {
                 allLinkTags.addAll(dynamicLinkTags);
@@ -212,7 +212,7 @@ public class FooGlueTag
           // get all link tags for the ids first
           List<String> allScriptTags = new ArrayList<String>();
           for (String tagId : tagIdSet) {
-            List<String> scriptTags = fooglue.getScriptTagsForId(tagId,
+            List<String> scriptTags = fg.getScriptTagsForId(tagId,
               curLocale, includeGlobal);
             if (scriptTags != null && scriptTags.size() > 0) {
               allScriptTags.addAll(scriptTags);
@@ -224,7 +224,7 @@ public class FooGlueTag
             List<Map<String, String>> requestScripts = (List<Map<String, String>>)request
               .getAttribute(FooGlueConstants.SCRIPTS);
             if (requestScripts != null && requestScripts.size() > 0) {
-              List<String> dynamicScripts = fooglue.getDynamicScriptTags(
+              List<String> dynamicScripts = fg.getDynamicScriptTags(
                 requestScripts, curLocale);
               if (dynamicScripts != null && dynamicScripts.size() > 0) {
                 allScriptTags.addAll(dynamicScripts);
